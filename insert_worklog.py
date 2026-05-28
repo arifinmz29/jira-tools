@@ -1,10 +1,28 @@
-from jira import JIRA
+import os
 import re
+from jira import JIRA
+
+# Load environment variables manually from .env
+def load_dotenv():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" in line:
+                    key, val = line.split("=", 1)
+                    key = key.strip()
+                    val = val.strip().strip("'\"")
+                    os.environ[key] = val
+
+load_dotenv()
 
 # Konfigurasi Jira
-JIRA_BASE_URL = "https://lionparcel.atlassian.net"
-USERNAME = ""
-API_TOKEN = ""
+JIRA_BASE_URL = os.getenv("JIRA_BASE_URL")
+USERNAME = os.getenv("USERNAME")
+API_TOKEN = os.getenv("API_TOKEN")
 
 # Autentikasi ke Jira
 jira = JIRA(

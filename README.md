@@ -33,12 +33,19 @@ Sebelum menggunakan script ini, pastikan sudah terinstall:
 
 ### Setup Credentials
 
-Setiap script memerlukan konfigurasi email dan API token. Edit file script dan isi:
+Setiap script memerlukan konfigurasi `JIRA_BASE_URL`, `USERNAME`, dan `API_TOKEN`.
 
-```python
-EMAIL = "email-kamu@lionparcel.com"
-API_TOKEN = "api-token-kamu"
-```
+1. Duplikat file `.env.example` menjadi `.env` di root direktori project:
+   ```bash
+   cp .env.example .env
+   ```
+2. Buka file `.env` dan isi dengan detail credential Jira Anda:
+   ```env
+   # Konfigurasi Jira
+   JIRA_BASE_URL="https://lionparcel.atlassian.net"
+   USERNAME="email-kamu@lionparcel.com"
+   API_TOKEN="api-token-kamu"
+   ```
 
 ---
 
@@ -60,14 +67,13 @@ Script ini digunakan untuk update Story Points secara bulk dari file CSV.
    GQA-5129,2.0
    ```
 
-2. **Edit konfigurasi** di script:
+2. **Setup Credentials**: Pastikan file `.env` sudah terisi dengan benar.
+3. **Atur Path CSV** di dalam script `update_story_point_from_csv.py` (jika berbeda):
    ```python
-   EMAIL = "email-kamu@lionparcel.com"
-   API_TOKEN = "api-token-kamu"
    CSV_FILE = "/path/to/csv_files/list_sp_all.csv"
    ```
 
-3. **Jalankan script:**
+4. **Jalankan script:**
    ```bash
    python update_story_point_from_csv.py
    ```
@@ -97,13 +103,9 @@ Script ini digunakan untuk menambahkan worklog secara bulk ke multiple Jira tick
 
 #### 📝 Cara Penggunaan
 
-1. **Edit konfigurasi** di script:
-   ```python
-   USERNAME = "email-kamu@lionparcel.com"
-   API_TOKEN = "api-token-kamu"
-   ```
+1. **Setup Credentials**: Pastikan file `.env` sudah terisi dengan benar.
 
-2. **Atur input ticket dan worklog:**
+2. **Atur input ticket dan worklog** di dalam script `insert_worklog.py`:
    ```python
    ticket_input = "[GQA-4379][GQA-4380][GQA-4381]"
    time_spent = "5m"
@@ -156,6 +158,9 @@ Worklogs yang akan ditambahkan:
 ```
 jira-tools/
 ├── README.md
+├── .gitignore
+├── .env.example
+├── .env                  # File credentials Anda (diabaikan oleh git)
 ├── update_story_point_from_csv.py
 ├── insert_worklog.py
 └── csv_files/
