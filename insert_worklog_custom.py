@@ -1,5 +1,5 @@
+import csv
 import os
-import re
 from datetime import datetime, timezone, timedelta
 from jira import JIRA
 
@@ -47,26 +47,45 @@ def parse_started(started_input: str) -> datetime:
         ) from e
 
 
+def load_worklogs_from_csv(csv_path: str) -> list[dict]:
+    """Baca worklog dari CSV. Kolom: issue, started, time_spent, comment."""
+    worklogs = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            worklogs.append({
+                "issue": row["issue"].strip(),
+                "time_spent": row["time_spent"].strip(),
+                "comment": row["comment"].strip(),
+                "started_input": row["started"].strip(),
+            })
+    return worklogs
+
+
 # ========================
-# Input ticket string
-ticket_input = "[GQA-9486][GQA-9346]"
-time_spent = "5m"
-comment = "[REVIEW PR] testing"
-started_input = ""  # Format: DD/MM/YYYY hh:mm, kosongkan untuk menggunakan waktu sekarang
+# Input worklog dari CSV
+# Kolom: issue, started (DD/MM/YYYY hh:mm, kosong = waktu sekarang), time_spent, comment
+CSV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "csv_files", "worklogs.csv")
 # ========================
 
-started = parse_started(started_input)
+worklogs_input = load_worklogs_from_csv(CSV_FILE)
 
-# Regex ambil semua tiket di dalam [....]
-tickets = re.findall(r"\[(.*?)\]", ticket_input)
+worklogs = [
+    {
+        "issue": wl["issue"],
+        "timeSpent": wl["time_spent"],
+        "comment": wl["comment"],
+        "started": parse_started(wl.get("started_input", "")),
+    }
+    for wl in worklogs_input
+]
 
-# Generate list worklogs otomatis
-worklogs = [{"issue": t, "timeSpent": time_spent, "comment": comment} for t in tickets]
-
-print(f"Waktu worklog: {started.strftime('%d/%m/%Y %H:%M')}")
 print("Worklogs yang akan ditambahkan:")
 for wl in worklogs:
-    print(wl)
+    print(
+        f"  {wl['issue']}: {wl['timeSpent']}, "
+        f"{wl['comment']}, "
+        f"{wl['started'].strftime('%d/%m/%Y %H:%M')}"
+    )
 
 # Insert worklog secara bulk
 for wl in worklogs:
@@ -74,6 +93,6 @@ for wl in worklogs:
         issue=wl["issue"],
         timeSpent=wl["timeSpent"],
         comment=wl["comment"],
-        started=started,
+        started=wl["started"],
     )
     print(f"✔ Worklog berhasil ditambahkan di {wl['issue']} dengan ID {worklog.id}")
